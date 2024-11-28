@@ -92,7 +92,7 @@ Window LoadDataWindow() : Panel
 	ListBox lbSelectionList,selWave=root:VarList:wParameterSel,mode= 4
 	SetVariable svAdjustDH,pos={405.00,62.00},size={60.00,18.00},title=" "
 	SetVariable svAdjustDH,value= root:GlobalVariables:gAdjustDH
-	CheckBox cburl,pos={381.00,478.00},size={65.00,15.00},title="Print URL"
+	CheckBox cburl,pos={381.00,526.00},size={65.00,15.00},title="Print URL"
 	CheckBox cburl,variable= root:GlobalVariables:gPrintURL
 	SetVariable svAdjustTimezone,pos={405.00,35.00},size={60.00,18.00},title=" "
 	SetVariable svAdjustTimezone,help={"Archiver solicitations must have\rfuse adjust for current timezone"}
@@ -100,12 +100,16 @@ Window LoadDataWindow() : Panel
 	SetVariable svAdjustTimezone,limits={-11,14,1},value= root:GlobalVariables:gTimezone
 	CheckBox cbBPMs,pos={381.00,454.00},size={87.00,15.00},title="BPMs to Zero"
 	CheckBox cbBPMs,variable= root:GlobalVariables:gZRbpms
+	CheckBox cbPS,pos={381.00,478.00},size={87.00,15.00},title="PS to Zero"
+	CheckBox cbPS,variable= root:GlobalVariables:gZRps
+	CheckBox cbTemp,pos={381.00,502.00},size={87.00,15.00},title="TEMP to Zero"
+	CheckBox cbTemp,variable= root:GlobalVariables:gZRtemp
 	Button btnMore,pos={440.00,358.00},size={28.00,19.00},proc=ButtonProc_OpenPDG,title="..."
 	Button btnMore,help={"Hint:\rClick to select predefined groups to add to Selection Parameters."}
 	ValDisplay vdBar,pos={27.00,604.00},size={459.00,17.00},disable=1
 	ValDisplay vdBar,limits={0,100,0},barmisc={0,0},mode= 3,highColor= (0,65535,0)
 	ValDisplay vdBar,value= _NUM:100
-	Button btnCancel,pos={379.00,512.00},size={90.00,29.00},disable=1,title="Cancel"
+	Button btnCancel,pos={379.00,550.00},size={90.00,29.00},disable=1,title="Cancel"
 	SetWindow kwTopWin,hook(spinner)=LoadDataWindowSpinHook
 EndMacro
 
@@ -774,9 +778,11 @@ Function ButtonProc_LoadSelection(ba) : ButtonControl
 	wave/T wParameters2Search = root:VarList:wParameters2Search
 	wave/T wGrepRes = root:VarList:wGrepRes
 	SVAR/Z PVsFile = root:GlobalVariables:gPVsfile
-	SVAR/Z gEmptyPV = root:GlovalVariables:gEmptyPV
+	SVAR/Z gEmptyPV = root:GlobalVariables:gEmptyPV
 	wave/T wPVs = root:VarList:wPVs
-	SVAR/Z gZRbpms = root:GlovalVariables:gZRbpms
+	SVAR/Z gZRbpms = root:GlobalVariables:gZRbpms
+	SVAR/Z gZRps = root:GlobalVariables:gZRps
+	SVAR/Z gZRtemp = root:GlobalVariables:gZRtemp
 	NVAR/Z gAbort = root:GlobalVariables:gAbort
 	NVAR/Z Method = root:GlobalVariables:gMethod
 	wave/Z/T FrozenWaves = root:VarList:wFrozenWaves
@@ -860,6 +866,21 @@ Function ButtonProc_LoadSelection(ba) : ButtonControl
 								BpmShiftWave(0, changedname)
 							endif
 						endif
+						//---------------------------------------------------------			
+						if(GetControlValueNbr("cbPS", "LoadDataWindow") == 1)
+							if(stringmatch(wPVs[i],"*Current*")|(stringmatch(wPVs[i],"*Voltage*")|(stringmatch(wPVs[i],"*PWM*"))))
+								changedname = ReplaceString(":", wPVs[i], "_")
+								PsShiftWave(0, changedname)
+							endif
+						endif
+							
+						if(GetControlValueNbr("cbTemp", "LoadDataWindow") == 1)
+							if(stringmatch(wPVs[i],"*emp*")|(stringmatch(wPVs[i],"*T-Mon")))
+								changedname = ReplaceString(":", wPVs[i], "_")
+								TempShiftWave(0, changedname)
+							endif
+						endif
+						
 					endif
 					bar = 100/numpnts(wPVs)
 					ValDisplay vdBar win=LoadDataWindow, value= _NUM:bar+bar*i
