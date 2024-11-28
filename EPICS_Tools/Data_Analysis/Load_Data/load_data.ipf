@@ -566,21 +566,96 @@ Function BpmShiftWave(ref, wname)
 	endif
 End
 
-//função que aplica o shift de todos os BPMs
 Function ShiftAllBPMs()
 	string fulllist = WaveList("*BPM*Mon*", ";", "")
-	string name, cmd, wname
+	string name, cmd
 	variable i
    
    if (ItemsInList(fulllist) > 0)
 		for(i=0; i<itemsinlist(fulllist); i+=1)
 			name = stringfromlist(i, fulllist)
-			wname = name
-			BpmShiftWave(0, wname)
-//			sprintf cmd, "BpmShiftWave(0, '%s')", name
-//			execute cmd    
+			sprintf cmd, "BpmShiftWave(0, '%s')", name
+			execute cmd    
 		endfor
 	print "BPMs Shifting Operation Complete!"
+	print " "
+	endif
+end
+
+Function PsShiftWave(ref, wname)
+	variable ref
+	string wname
+	variable diff
+	variable NEWpntval
+	variable i
+	string name
+	string cmd
+	wave/Z mywave = $wname
+	
+	if (numpnts(mywave) > 0)
+	diff = ref - mywave[0]
+		for(i=0;numpnts(mywave)>i;i+=1)
+			NEWpntval = mywave[i] + diff
+			mywave[i] = NEWpntval
+		endfor
+	else
+		name = NameOfWave(mywave)
+		sprintf cmd, "Wave %s vazia!", wname
+		print cmd
+	endif
+End
+
+Function ShiftAllPS()
+	string fulllist = WaveList("*Current*|*Voltage*|*PWM*", ";", "")
+	string name, cmd
+	variable i
+   
+   if (ItemsInList(fulllist) > 0)
+		for(i=0; i<itemsinlist(fulllist); i+=1)
+			name = stringfromlist(i, fulllist)
+			sprintf cmd, "PsShiftWave(0, '%s')", name
+			execute cmd    
+		endfor
+	print "PS Shifting Operation Complete!"
+	print " "
+	endif
+end
+
+Function TempShiftWave(ref, wname)
+	variable ref
+	string wname
+	variable diff
+	variable NEWpntval
+	variable i
+	string name
+	string cmd
+	wave/Z mywave = $wname
+	
+	if (numpnts(mywave) > 0)
+	diff = ref - mywave[0]
+		for(i=0;numpnts(mywave)>i;i+=1)
+			NEWpntval = mywave[i] + diff
+			mywave[i] = NEWpntval
+		endfor
+	else
+		name = NameOfWave(mywave)
+		sprintf cmd, "Wave %s vazia!", wname
+		print cmd
+	endif
+End
+
+Function ShiftAllTEMP()
+	string fulllist = WaveList("*emp*|*T-Mon*", ";", "")
+	string name, cmd
+	variable i
+   
+   if (ItemsInList(fulllist) > 0)
+		for(i=0; i<itemsinlist(fulllist); i+=1)
+			name = stringfromlist(i, fulllist)
+			sprintf cmd, "TempShiftWave(0, '%s')", name
+			execute cmd    
+		endfor
+	print "Temperatures Shifting Operation Complete!"
 	print " "
 	endif
 end
